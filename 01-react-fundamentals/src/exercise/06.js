@@ -26,6 +26,7 @@ function UsernameForm({onSubmitUsername}) {
         <label htmlFor="usernameField">Username:</label>
         <input
           id="usernameField"
+          name="usernameField"
           type="text"
           value={inputValue}
           onChange={handleCange}
