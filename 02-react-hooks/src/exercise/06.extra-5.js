@@ -1,18 +1,57 @@
 import * as React from 'react'
 import {
   PokemonForm,
-  PokemonInfoFallback,
   PokemonDataView,
+  PokemonInfoFallback,
   fetchPokemon,
 } from '../pokemon'
 
+function PokemonInfo({pokemonName}) {
+  const [state, setState] = React.useState({
+    status: 'idle',
+    pokemon: null,
+    error: null,
+  })
+  const {error, pokemon, status} = state
+
+  React.useEffect(() => {
+    if (!pokemonName) return
+
+    setState({status: 'pending'})
+    fetchPokemon(pokemonName).then(
+      pokemonData => {
+        setState({status: 'resolved', pokemon: pokemonData})
+      },
+      pokemonError => {
+        setState({status: 'rejected', error: pokemonError})
+      },
+    )
+  }, [pokemonName])
+
+  switch (status) {
+    case 'idle':
+      return 'Submit a pokemon'
+    case 'pending':
+      return <PokemonInfoFallback name={pokemonName} />
+    case 'rejected':
+      throw error
+    case 'resolved':
+      return <PokemonDataView pokemon={pokemon} />
+    default:
+      throw new Error('This should be impossible')
+  }
+}
+
 class ErrorBoundary extends React.Component {
   state = {error: null}
+
   static getDerivedStateFromError(error) {
     return {error}
   }
+
   render() {
     const {error} = this.state
+
     if (error) {
       return <this.props.FallbackComponent error={error} />
     }
@@ -28,37 +67,6 @@ function ErrorFallback({error}) {
       <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
     </div>
   )
-}
-
-function PokemonInfo({pokemonName}) {
-  const [state, setState] = React.useState({
-    status: pokemonName ? 'pending' : 'idle',
-    pokemon: null,
-    error: null,
-  })
-  const {status, pokemon, error} = state
-
-  React.useEffect(() => {
-    if (!pokemonName) return
-
-    setState({status: 'pending'})
-    fetchPokemon(pokemonName).then(
-      pokemon => setState({status: 'resolved', pokemon}),
-      error => setState({status: 'rejected', error}),
-    )
-  }, [pokemonName])
-
-  if (status === 'idle') {
-    return 'Submit a pokemon'
-  } else if (status === 'pending') {
-    return <PokemonInfoFallback name={pokemonName} />
-  } else if (status === 'rejected') {
-    throw error
-  } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={pokemon} />
-  }
-
-  return new Error('This should be impossible')
 }
 
 function App() {

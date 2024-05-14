@@ -1,51 +1,30 @@
 import * as React from 'react'
-import {ErrorBoundary} from 'react-error-boundary'
 import {
   PokemonForm,
-  PokemonInfoFallback,
   PokemonDataView,
+  PokemonInfoFallback,
   fetchPokemon,
 } from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
-  const [state, setState] = React.useState({
-    status: pokemonName ? 'pending' : 'idle',
-    pokemon: null,
-    error: null,
-  })
-  const {status, pokemon, error} = state
+  const [pokemon, setPokemon] = React.useState(null)
 
   React.useEffect(() => {
     if (!pokemonName) return
 
-    setState({status: 'pending'})
-    fetchPokemon(pokemonName).then(
-      pokemon => setState({status: 'resolved', pokemon}),
-      error => setState({status: 'rejected', error}),
-    )
+    setPokemon(null)
+    fetchPokemon(pokemonName).then(pokemonData => {
+      setPokemon(pokemonData)
+    })
   }, [pokemonName])
 
-  if (status === 'idle') {
+  if (!pokemonName) {
     return 'Submit a pokemon'
-  } else if (status === 'pending') {
+  } else if (!pokemon) {
     return <PokemonInfoFallback name={pokemonName} />
-  } else if (status === 'rejected') {
-    throw error
-  } else if (status === 'resolved') {
+  } else {
     return <PokemonDataView pokemon={pokemon} />
   }
-
-  return new Error('This should be impossible')
-}
-
-function ErrorFallback({error, resetErrorBoundary}) {
-  return (
-    <div role="alert">
-      There was an error:{' '}
-      <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
-      <button onClick={resetErrorBoundary}>Try again</button>
-    </div>
-  )
 }
 
 function App() {
@@ -60,13 +39,7 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <ErrorBoundary
-          FallbackComponent={ErrorFallback}
-          resetKeys={[pokemonName]}
-          onReset={() => setPokemonName('')}
-        >
-          <PokemonInfo pokemonName={pokemonName} />
-        </ErrorBoundary>
+        <PokemonInfo pokemonName={pokemonName} />
       </div>
     </div>
   )
