@@ -1,5 +1,3 @@
-// useContext: Caching response data in context
-// 💯 caching in a context provider (exercise)
 // http://localhost:3000/isolated/exercise/03.extra-2.js
 
 import * as React from 'react'
@@ -25,10 +23,15 @@ function pokemonCacheReducer(state, action) {
   }
 }
 
-function PokemonCacheProvider(props) {
+function PokemonCacheProvider({children}) {
   const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {})
+  const value = [cache, dispatch]
 
-  return <PokemonCacheContext.Provider value={[cache, dispatch]} {...props} />
+  return (
+    <PokemonCacheContext.Provider value={value}>
+      {children}
+    </PokemonCacheContext.Provider>
+  )
 }
 
 function usePokemonCache() {
@@ -73,7 +76,6 @@ function PokemonInfo({pokemonName}) {
 
 function PreviousPokemon({onSelect}) {
   const [cache] = usePokemonCache()
-
   return (
     <div>
       Previous Pokemon
@@ -95,8 +97,8 @@ function PreviousPokemon({onSelect}) {
 
 function PokemonSection({onSelect, pokemonName}) {
   return (
-    <div style={{display: 'flex'}}>
-      <PokemonCacheProvider>
+    <PokemonCacheProvider>
+      <div style={{display: 'flex'}}>
         <PreviousPokemon onSelect={onSelect} />
         <div className="pokemon-info" style={{marginLeft: 10}}>
           <PokemonErrorBoundary
@@ -106,8 +108,8 @@ function PokemonSection({onSelect, pokemonName}) {
             <PokemonInfo pokemonName={pokemonName} />
           </PokemonErrorBoundary>
         </div>
-      </PokemonCacheProvider>
-    </div>
+      </div>
+    </PokemonCacheProvider>
   )
 }
 

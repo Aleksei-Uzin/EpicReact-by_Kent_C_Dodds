@@ -27,73 +27,47 @@ function asyncReducer(state, action) {
   }
 }
 
-function useSafeDispatch(dispatch) {
-  const mountedRef = React.useRef(false)
-
-  React.useLayoutEffect(() => {
-    mountedRef.current = true
-
-    return () => {
-      mountedRef.current = false
-    }
-  }, [])
-
-  return React.useCallback(
-    (...args) => {
-      if (mountedRef.current) {
-        dispatch(...args)
-      }
-    },
-    [dispatch],
-  )
-}
-
-function useAsync(initialState) {
-  const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
+function useAsync(asyncCallback, initialState) {
+  const [state, dispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
     error: null,
     ...initialState,
   })
 
-  const dispatch = useSafeDispatch(unsafeDispatch)
+  React.useEffect(() => {
+    const promise = asyncCallback()
 
-  const run = React.useCallback(
-    promise => {
-      dispatch({type: 'pending'})
-      promise.then(
-        data => {
-          dispatch({type: 'resolved', data})
-        },
-        error => {
-          dispatch({type: 'rejected', error})
-        },
-      )
-    },
-    [dispatch],
-  )
+    if (!promise) {
+      return
+    }
+    dispatch({type: 'pending'})
+    promise.then(
+      data => {
+        dispatch({type: 'resolved', data})
+      },
+      error => {
+        dispatch({type: 'rejected', error})
+      },
+    )
+  }, [asyncCallback])
 
-  return {...state, run}
+  return state
 }
 
 function PokemonInfo({pokemonName}) {
-  const {
-    data: pokemon,
-    status,
-    error,
-    run,
-  } = useAsync({
-    status: pokemonName ? 'pending' : 'idle',
-  })
-
-  React.useEffect(() => {
+  const asyncCallback = React.useCallback(() => {
     if (!pokemonName) {
       return
     }
+    return fetchPokemon(pokemonName)
+  }, [pokemonName])
 
-    const pokemonPromise = fetchPokemon(pokemonName)
-    run(pokemonPromise)
-  }, [pokemonName, run])
+  const state = useAsync(asyncCallback, {
+    status: pokemonName ? 'pending' : 'idle',
+  })
+
+  const {data: pokemon, status, error} = state
 
   switch (status) {
     case 'idle':

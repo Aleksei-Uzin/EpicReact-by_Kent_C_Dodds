@@ -1,10 +1,8 @@
-// useImperativeHandle: scroll to top/bottom
-// http://localhost:3000/isolated/exercise/05.js
-
 import * as React from 'react'
 
 function MessagesDisplay({messages}, ref) {
   const containerRef = React.useRef()
+
   React.useLayoutEffect(() => {
     scrollToBottom()
   })
@@ -12,6 +10,7 @@ function MessagesDisplay({messages}, ref) {
   function scrollToTop() {
     containerRef.current.scrollTop = 0
   }
+
   function scrollToBottom() {
     containerRef.current.scrollTop = containerRef.current.scrollHeight
   }
@@ -33,7 +32,7 @@ function MessagesDisplay({messages}, ref) {
   )
 }
 
-// 🐨 wrap MessagesDisplay in a React.forwardRef and accept `ref` as the second argument
+// Hack by Kent C Dodds
 // eslint-disable-next-line no-func-assign
 MessagesDisplay = React.forwardRef(MessagesDisplay)
 

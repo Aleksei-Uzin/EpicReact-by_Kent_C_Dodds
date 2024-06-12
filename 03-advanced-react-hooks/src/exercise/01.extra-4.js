@@ -2,11 +2,9 @@ import * as React from 'react'
 
 function countReducer(state, action) {
   switch (action.type) {
-    case 'INCREMENT':
-      return {
-        ...state,
-        count: state.count + action.step,
-      }
+    case 'INCREMENT': {
+      return {count: state.count + action.step}
+    }
     default:
       throw new Error(`Unsupported action type: ${action.type}`)
   }
