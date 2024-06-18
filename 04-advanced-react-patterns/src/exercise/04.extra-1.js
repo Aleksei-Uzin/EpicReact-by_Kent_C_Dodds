@@ -14,11 +14,21 @@ function useToggle() {
 
 function App() {
   const {on, togglerProps} = useToggle()
+
+  const handleClick = () => {
+    console.info('onButtonClick')
+    togglerProps.onClick()
+  }
+
   return (
     <div>
       <Switch on={on} {...togglerProps} />
       <hr />
-      <button aria-label="custom-button" {...togglerProps}>
+      <button
+        aria-label="custom-button"
+        {...togglerProps}
+        onClick={handleClick}
+      >
         {on ? 'on' : 'off'}
       </button>
     </div>

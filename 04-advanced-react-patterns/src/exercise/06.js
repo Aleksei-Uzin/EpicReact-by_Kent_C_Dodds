@@ -37,14 +37,12 @@ function useToggle({
   const onIsControlled = controlledOn != null
   const on = onIsControlled ? controlledOn : state.on
 
-  // We want to call `onChange` any time we need to make a state change, but we
-  // only want to call `dispatch` if `!onIsControlled` (otherwise we could get
-  // unnecessary renders).
-  // 🐨 To simplify things a bit, let's make a `dispatchWithOnChange` function
-  // right here. This will:
-  // 1. accept an action
-  // 2. if onIsControlled is false, call dispatch with that action
-  // 3. Then call `onChange` with our "suggested changes" and the action.
+  function dispatchWithOnChange(action) {
+    if (!onIsControlled) {
+      dispatch(action)
+    }
+    onChange?.(reducer({...state, on}, action), action)
+  }
 
   // 🦉 "Suggested changes" refers to: the changes we would make if we were
   // managing the state ourselves. This is similar to how a controlled <input />
@@ -60,13 +58,6 @@ function useToggle({
   // `onChange(reducer({...state, on}, action), action)`
   // 💰 Also note that user's don't *have* to pass an `onChange` prop (it's not required)
   // so keep that in mind when you call it! How could you avoid calling it if it's not passed?
-
-  function dispatchWithOnChange(action) {
-    if (!onIsControlled) {
-      dispatch(action)
-    }
-    onChange?.(reducer({...state, on}, action), action)
-  }
 
   const toggle = () => dispatchWithOnChange({type: actionTypes.toggle})
   const reset = () =>

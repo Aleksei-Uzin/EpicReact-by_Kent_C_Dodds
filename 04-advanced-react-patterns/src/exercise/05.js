@@ -1,32 +1,84 @@
 import * as React from 'react'
 import {Switch} from '../switch'
-import {actionTypes, toggleReducer, useToggle} from './useToggle'
 
-/**
- * Source:
- * https://kentcdodds.com/blog/the-state-reducer-pattern-with-react-hooks
- *
- */
+const callAll =
+  (...fns) =>
+  (...args) =>
+    fns.forEach(fn => fn && fn(...args))
+
+function toggleReducer(state, {type, initialState}) {
+  switch (type) {
+    case 'toggle': {
+      return {on: !state.on}
+    }
+    case 'reset': {
+      return initialState
+    }
+    default: {
+      throw new Error(`Unsupported type: ${type}`)
+    }
+  }
+}
+
+function useToggle({initialOn = false, reducer = toggleReducer} = {}) {
+  const {current: initialState} = React.useRef({on: initialOn})
+  const [state, dispatch] = React.useReducer(reducer, initialState)
+  const {on} = state
+
+  const toggle = () => dispatch({type: 'toggle'})
+  const reset = () => dispatch({type: 'reset', initialState})
+
+  function getTogglerProps({onClick, ...props} = {}) {
+    return {
+      'aria-pressed': on,
+      onClick: callAll(onClick, toggle),
+      ...props,
+    }
+  }
+
+  function getResetterProps({onClick, ...props} = {}) {
+    return {
+      onClick: callAll(onClick, reset),
+      ...props,
+    }
+  }
+
+  return {
+    on,
+    reset,
+    toggle,
+    getTogglerProps,
+    getResetterProps,
+  }
+}
 
 function App() {
   const [timesClicked, setTimesClicked] = React.useState(0)
   const clickedTooMuch = timesClicked >= 4
 
   function toggleStateReducer(state, action) {
-    if (clickedTooMuch && action.type === actionTypes.toggle) {
-      return {on: state.on}
+    switch (action.type) {
+      case 'toggle': {
+        if (clickedTooMuch) {
+          return {on: state.on}
+        }
+        return {on: !state.on}
+      }
+      case 'reset': {
+        return {on: false}
+      }
+      default: {
+        throw new Error(`Unsupported type: ${action.type}`)
+      }
     }
-    return toggleReducer(state, action)
   }
 
-  const {on, getResetterProps, getTogglerProps, setOff, setOn} = useToggle({
+  const {on, getTogglerProps, getResetterProps} = useToggle({
     reducer: toggleStateReducer,
   })
 
   return (
     <div>
-      <button onClick={setOff}>Switch Off</button>
-      <button onClick={setOn}>Switch On</button>
       <Switch
         {...getTogglerProps({
           disabled: clickedTooMuch,

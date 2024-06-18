@@ -1,16 +1,14 @@
 import * as React from 'react'
 
-const actionTypes = {
-  toggle: 'TOGGLE',
-  reset: 'RESET',
-  on: 'ON',
-  off: 'OFF',
-}
-
 const callAll =
   (...fns) =>
   (...args) =>
     fns.forEach(fn => fn && fn(...args))
+
+const actionTypes = {
+  toggle: 'toggle',
+  reset: 'reset',
+}
 
 function toggleReducer(state, {type, initialState}) {
   switch (type) {
@@ -20,14 +18,8 @@ function toggleReducer(state, {type, initialState}) {
     case actionTypes.reset: {
       return initialState
     }
-    case actionTypes.on: {
-      return {on: true}
-    }
-    case actionTypes.off: {
-      return {on: false}
-    }
     default: {
-      throw new Error(`Unhandled type: ${type}`)
+      throw new Error(`Unsupported type: ${type}`)
     }
   }
 }
@@ -39,8 +31,6 @@ function useToggle({initialOn = false, reducer = toggleReducer} = {}) {
 
   const toggle = () => dispatch({type: actionTypes.toggle})
   const reset = () => dispatch({type: actionTypes.reset, initialState})
-  const setOn = () => dispatch({type: actionTypes.on})
-  const setOff = () => dispatch({type: actionTypes.off})
 
   function getTogglerProps({onClick, ...props} = {}) {
     return {
@@ -59,10 +49,8 @@ function useToggle({initialOn = false, reducer = toggleReducer} = {}) {
 
   return {
     on,
-    setOff,
-    setOn,
-    toggle,
     reset,
+    toggle,
     getTogglerProps,
     getResetterProps,
   }
