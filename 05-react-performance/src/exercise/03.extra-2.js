@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {useCombobox} from '../use-combobox'
-import {getItems} from '../filter-cities'
-import {useForceRerender} from '../utils'
+import {getItems} from '../workerized-filter-cities'
+import {useAsync, useForceRerender} from '../utils'
 
 function Menu({
   items,
@@ -18,8 +18,8 @@ function Menu({
           getItemProps={getItemProps}
           item={item}
           index={index}
-          selectedItem={selectedItem}
-          highlightedIndex={highlightedIndex}
+          isSelected={selectedItem?.id === item.id}
+          isHighlighted={highlightedIndex === index}
         >
           {item.name}
         </ListItem>
@@ -28,16 +28,16 @@ function Menu({
   )
 }
 
+Menu = React.memo(Menu)
+
 function ListItem({
   getItemProps,
   item,
   index,
-  selectedItem,
-  highlightedIndex,
+  isSelected,
+  isHighlighted,
   ...props
 }) {
-  const isSelected = selectedItem?.id === item.id
-  const isHighlighted = highlightedIndex === index
   return (
     <li
       {...getItemProps({
@@ -53,11 +53,16 @@ function ListItem({
   )
 }
 
+ListItem = React.memo(ListItem)
+
 function App() {
   const forceRerender = useForceRerender()
   const [inputValue, setInputValue] = React.useState('')
 
-  const allItems = React.useMemo(() => getItems(inputValue), [inputValue])
+  const {data: allItems, run} = useAsync({data: [], status: 'pending'})
+  React.useEffect(() => {
+    run(getItems(inputValue))
+  }, [inputValue, run])
   const items = allItems.slice(0, 100)
 
   const {
@@ -106,3 +111,8 @@ function App() {
 }
 
 export default App
+
+/*
+eslint
+  no-func-assign: 0,
+*/

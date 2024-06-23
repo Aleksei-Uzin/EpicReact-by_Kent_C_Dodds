@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {useCombobox} from '../use-combobox'
-import {getItems} from '../filter-cities'
-import {useForceRerender} from '../utils'
+import {getItems} from '../workerized-filter-cities'
+import {useAsync, useForceRerender} from '../utils'
 
 function Menu({
   items,
@@ -56,8 +56,12 @@ function ListItem({
 function App() {
   const forceRerender = useForceRerender()
   const [inputValue, setInputValue] = React.useState('')
+  const {data: allItems, run} = useAsync({data: [], status: 'pending'})
 
-  const allItems = React.useMemo(() => getItems(inputValue), [inputValue])
+  React.useEffect(() => {
+    run(getItems(inputValue))
+  }, [inputValue, run])
+
   const items = allItems.slice(0, 100)
 
   const {
