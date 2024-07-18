@@ -36,7 +36,7 @@ function createPokemonResource(pokemonName) {
 
   // shows busy indicator for a split second
   // 💯 this is what the extra credit improves
-  // delay = 200
+  delay = 200
   return createResource(fetchPokemon(pokemonName, delay))
 }
 
@@ -67,7 +67,7 @@ function App() {
     <div className="pokemon-info-app">
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
-      <div className="pokemon-info" style={{opacity: isPending ? 0.6 : 1}}>
+      <div className={`pokemon-info ${isPending ? 'pokemon-loading' : ''}`}>
         {pokemonResource ? (
           <PokemonErrorBoundary
             onReset={handleReset}
