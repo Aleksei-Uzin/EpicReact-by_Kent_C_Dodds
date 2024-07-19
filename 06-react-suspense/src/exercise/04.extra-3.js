@@ -26,18 +26,50 @@ const SUSPENSE_CONFIG = {
   busyMinDurationMs: 700,
 }
 
-const pokemonResourceCache = {}
+const PokemonResourceCacheContext = React.createContext()
 
-function getPokemonResource(name) {
-  const lowerName = name.toLowerCase()
-  let resource = pokemonResourceCache[lowerName]
+function PokemonCacheProvider({children, cacheTime}) {
+  const cache = React.useRef({})
+  const expiration = React.useRef({})
 
-  if (!resource) {
-    resource = createPokemonResource(lowerName)
-    pokemonResourceCache[lowerName] = resource
-  }
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      for (const [name, time] of Object.entries(expiration.current)) {
+        if (time < Date.now()) {
+          delete cache.current[name]
+        }
+      }
+    }, 1000)
 
-  return resource
+    return () => clearInterval(interval)
+  }, [])
+
+  const getPokemonResource = React.useCallback(
+    name => {
+      const lowerName = name.toLowerCase()
+      let resource = cache.current[lowerName]
+
+      if (!resource) {
+        resource = createPokemonResource(lowerName)
+        cache.current[lowerName] = resource
+      }
+
+      expiration.current[lowerName] = Date.now() + cacheTime
+
+      return resource
+    },
+    [cacheTime],
+  )
+
+  return (
+    <PokemonResourceCacheContext.Provider value={getPokemonResource}>
+      {children}
+    </PokemonResourceCacheContext.Provider>
+  )
+}
+
+function usePokemonResourceCache() {
+  return React.useContext(PokemonResourceCacheContext)
 }
 
 function createPokemonResource(pokemonName) {
@@ -48,6 +80,7 @@ function App() {
   const [pokemonName, setPokemonName] = React.useState('')
   const [startTransition, isPending] = React.useTransition(SUSPENSE_CONFIG)
   const [pokemonResource, setPokemonResource] = React.useState(null)
+  const getPokemonResource = usePokemonResourceCache()
 
   React.useEffect(() => {
     if (!pokemonName) {
@@ -57,7 +90,7 @@ function App() {
     startTransition(() => {
       setPokemonResource(getPokemonResource(pokemonName))
     })
-  }, [pokemonName, startTransition])
+  }, [getPokemonResource, pokemonName, startTransition])
 
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName)
@@ -91,4 +124,12 @@ function App() {
   )
 }
 
-export default App
+function AppWithProvider() {
+  return (
+    <PokemonCacheProvider cacheTime={5000}>
+      <App />
+    </PokemonCacheProvider>
+  )
+}
+
+export default AppWithProvider
