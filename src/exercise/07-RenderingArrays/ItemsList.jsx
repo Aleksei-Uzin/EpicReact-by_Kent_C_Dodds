@@ -22,7 +22,7 @@ export const ItemsList = () => {
       </button>
       <ul>
         {items.map(item => (
-          <li key={item.id}>
+          <li key={item.id} data-testid={item.id}>
             <button onClick={() => removeItem(item)}>remove</button> {/*  */}
             <label htmlFor={`${item.id}-input`}>{item.value}</label>{' '}
             <input
