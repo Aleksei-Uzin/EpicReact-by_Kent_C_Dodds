@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { Greeting } from '../Greeting'
 import userEvent from '@testing-library/user-event'
+import { Greeting } from '../Greeting'
 
 test('typing a name shows a greeting', async () => {
   render(<Greeting />)
