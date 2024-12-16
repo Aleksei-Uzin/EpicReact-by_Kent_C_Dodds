@@ -1,4 +1,26 @@
-# Getting Started with Create React App
+# React Hooks
+
+## Resources
+
+1. [Why React Hooks](https://www.youtube.com/watch?v=zWsZcBiwgVE&list=PLV5CVI1eNcJgNqzNwcs4UKrlJdhfDjshf)
+
+2. useState
+
+   - useState [link](https://react.dev/reference/react/useState)
+
+   - Queueing a Series of State Updates [link](https://react.dev/learn/queueing-a-series-of-state-updates)
+
+   - useState lazy initialization [link](https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates)
+
+3. useEffect
+
+   - useEffect [link](https://react.dev/reference/react/useEffect)
+
+   - Examples of connecting to an external system [link](https://react.dev/reference/react/useEffect#examples-connecting)
+
+4. React hook flow example issue [link](https://github.com/epicweb-dev/react-hooks/issues/90)
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
