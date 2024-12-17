@@ -20,6 +20,12 @@
 
 4. React hook flow example issue [link](https://github.com/epicweb-dev/react-hooks/issues/90)
 
+5. Lifting state
+
+   - Sharing State Between Components [link](https://react.dev/learn/sharing-state-between-components)
+
+   - State Colocation [link](https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster)
+
 ## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
